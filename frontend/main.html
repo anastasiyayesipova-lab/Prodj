@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Система пропусків у комп’ютерний клас</title>
+    <link rel="stylesheet" href="styles.css" />
+
+    <script src="app.js" defer></script>
+</head>
+
+<body>
+    <main class="page">
+        <h1 class="page-title">Система пропусків у комп’ютерний клас</h1>
+
+        <section class="panel">
+            <form class="form-create" id="passForm" autocomplete="off">
+                <label class="field" for="userName">
+                    <span class="field-label">UserName</span>
+                </label>
+                <input class="field-input" id="userName" name="userName" type="text" />
+                <p class="field-error" id="errUserName"></p>
+
+                <label class="field" for="reason">
+                    <span class="field-label">Reason</span>
+                </label>
+                <select class="field-input" id="reason" name="reason">
+                    <option value="">Оберіт причину</option>
+                    <option value="Навчальне заняття">Навчальне заняття</option>
+                    <option value="Олімпіада">Олімпіада</option>
+                    <option value="Проєктна робота">Проєктна робота</option>
+                    <option value="Консультація">Консультація</option>
+
+                </select>
+                <p class="field-error" id="errReason"></p>
+
+                <label class="field" for="validDate">
+                    <span class="field-label">ValidDate</span>
+                </label>
+                <input class="field-input" id="validDate" name="validDate" type="date" />
+                <p class="field-error" id="errValidDate"></p>
+
+                <label class="field" for="comment">
+                    <span class="field-label">Comment</span>
+                </label>
+                <textarea class="field-input" id="comment" name="comment" rows="4"></textarea>
+                <p class="field-error" id="errComment"></p>
+
+                <label class="field" for="issuer">
+                    <span class="field-label">Issuer</span>
+                </label>
+                <input class="field-input" id="issuer" name="issuer" type="text" />
+                <p class="field-error" id="errIssuer"></p>
+
+                <div class="form-actions">
+                    <button class="btn-submit" id="submitBtn" type="submit" disabled>Додати</button>
+                    <button class="btn-secondary" id="resetBtn" type="button">Очистити</button>
+                </div>
+            </form>
+
+            <p class="status-message" id="statusMessage" hidden></p>
+
+        </section>
+
+        <section class="panel">
+            <h2 class="panel-title">Список пропусків</h2>
+            <table class="table" id="passesTable" hidden>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>UserName</th>
+                        <th>Reason</th>
+                        <th>ValidDate</th>
+                        <th>Comment</th>
+                        <th>Issuer</th>
+                        <th>Дії</th>
+                    </tr>
+                </thead>
+                <tbody id="passesTbody"></tbody>
+            </table>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

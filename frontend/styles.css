@@ -1,0 +1,87 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.page-title {
+  margin: 0 0 12px;
+}
+
+.page {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title {
+  width: 100%;
+}
+
+.panel {
+  border: 1px solid #ddd;
+  padding: 12px;
+  flex: 1;
+  min-width: 300px;
+}
+
+.field {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.field-input {
+  width: 100%;
+  padding: 8px;
+}
+
+.form-actions {
+  margin-top: 10px;
+}
+
+.btn-submit {
+  padding: 8px 12px;
+}
+
+.btn-secondary {
+  padding: 8px 12px;
+}
+
+.status-message {
+  margin-top: 10px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.table th,
+.table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.table th {
+  background-color: #f0f0f0;
+}
+
+.is-invalid {
+  border: 2px solid crimson;
+  outline: none;
+}
