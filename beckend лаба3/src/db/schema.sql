@@ -1,0 +1,47 @@
+PRAGMA foreign_keys = ON;
+
+DROP TABLE IF EXISTS passHistory;
+DROP TABLE IF EXISTS passes;
+DROP TABLE IF EXISTS passStatuses;
+DROP TABLE IF EXISTS passReasons;
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  displayName TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  role TEXT NOT NULL CHECK (role IN ('student', 'teacher', 'admin'))
+);
+
+CREATE TABLE passReasons (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE passStatuses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE passes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  userId INTEGER NOT NULL,
+  reasonId INTEGER NOT NULL,
+  statusId INTEGER NOT NULL,
+  validDate TEXT NOT NULL,
+  comment TEXT CHECK (length(comment) <= 250),
+  issuer TEXT NOT NULL,
+  createdAt TEXT NOT NULL,
+  deletedAt TEXT,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (reasonId) REFERENCES passReasons(id) ON DELETE RESTRICT,
+  FOREIGN KEY (statusId) REFERENCES passStatuses(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE passHistory (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  passId INTEGER NOT NULL,
+  action TEXT NOT NULL,
+  createdAt TEXT NOT NULL,
+  FOREIGN KEY (passId) REFERENCES passes(id) ON DELETE CASCADE
+);
