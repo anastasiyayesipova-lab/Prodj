@@ -2,12 +2,15 @@ import { Request, Response } from "express";
 import * as passesService from "../services/passes.service";
 
 export async function getAllPasses(req: Request, res: Response) {
-  const items = await passesService.getAllPasses();
+  const items = await passesService.getAllPasses(Number(req.currentUserId));
   res.json({ items });
 }
 
 export async function getPassById(req: Request, res: Response) {
-  const pass = await passesService.getPassById(String(req.params.id));
+  const pass = await passesService.getPassById(
+    String(req.params.id),
+    Number(req.currentUserId)
+  );
 
   if (!pass) {
     return res.status(404).json({ message: "Not found" });
@@ -17,24 +20,35 @@ export async function getPassById(req: Request, res: Response) {
 }
 
 export async function createPass(req: Request, res: Response) {
-  const { userId, reasonId, statusId, validDate, issuer } = req.body;
+  const { reasonId, statusId, validDate, issuer } = req.body;
 
-  if (!userId || !reasonId || !statusId || !validDate || !issuer) {
+  if (!reasonId || !statusId || !validDate || !issuer) {
     return res.status(400).json({ message: "Invalid data" });
   }
 
-  const newPass = await passesService.createPass(req.body);
+  const newPass = await passesService.createPass({
+    ...req.body,
+    userId: Number(req.currentUserId),
+  });
+
   res.status(201).json(newPass);
 }
 
 export async function updatePass(req: Request, res: Response) {
-  const { userId, reasonId, statusId, validDate, issuer } = req.body;
+  const { reasonId, statusId, validDate, issuer } = req.body;
 
-  if (!userId || !reasonId || !statusId || !validDate || !issuer) {
+  if (!reasonId || !statusId || !validDate || !issuer) {
     return res.status(400).json({ message: "Invalid data" });
   }
 
-  const updated = await passesService.updatePass(String(req.params.id), req.body);
+  const updated = await passesService.updatePass(
+    String(req.params.id),
+    Number(req.currentUserId),
+    {
+      ...req.body,
+      userId: Number(req.currentUserId),
+    }
+  );
 
   if (!updated) {
     return res.status(404).json({ message: "Not found" });
@@ -44,7 +58,10 @@ export async function updatePass(req: Request, res: Response) {
 }
 
 export async function deletePass(req: Request, res: Response) {
-  const success = await passesService.deletePass(String(req.params.id));
+  const success = await passesService.deletePass(
+    String(req.params.id),
+    Number(req.currentUserId)
+  );
 
   if (!success) {
     return res.status(404).json({ message: "Not found" });
@@ -54,6 +71,6 @@ export async function deletePass(req: Request, res: Response) {
 }
 
 export async function getPassStats(req: Request, res: Response) {
-  const stats = await passesService.getPassStats();
+  const stats = await passesService.getPassStats(Number(req.currentUserId));
   res.json({ data: stats });
 }

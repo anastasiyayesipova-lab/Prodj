@@ -1,5 +1,4 @@
 import { all, get, run } from "../db/dbClient";
-import { escapeSqlString } from "../db/sqlHelpers";
 
 type User = {
   id: number;
@@ -27,28 +26,28 @@ async function list(): Promise<User[]> {
 }
 
 async function getById(id: string): Promise<User | undefined> {
-  const userId = Number(id);
-
-  return await get(`
+  return await get(
+    `
     SELECT
       id,
       displayName,
       email,
       role
     FROM users
-    WHERE id = ${userId};
-  `);
+    WHERE id = ?;
+  `,
+    [Number(id)]
+  );
 }
 
 async function create(data: UserInput): Promise<User> {
-  const displayName = escapeSqlString(data.name);
-  const email = escapeSqlString(data.email);
-  const role = escapeSqlString(data.role);
-
-  const result = await run(`
+  const result = await run(
+    `
     INSERT INTO users (displayName, email, role)
-    VALUES ('${displayName}', '${email}', '${role}');
-  `);
+    VALUES (?, ?, ?);
+  `,
+    [data.name, data.email, data.role]
+  );
 
   const created = await getById(String(result.lastID));
 
@@ -60,19 +59,17 @@ async function create(data: UserInput): Promise<User> {
 }
 
 async function update(id: string, data: UserInput): Promise<User | null> {
-  const userId = Number(id);
-  const displayName = escapeSqlString(data.name);
-  const email = escapeSqlString(data.email);
-  const role = escapeSqlString(data.role);
-
-  const result = await run(`
+  const result = await run(
+    `
     UPDATE users
     SET
-      displayName = '${displayName}',
-      email = '${email}',
-      role = '${role}'
-    WHERE id = ${userId};
-  `);
+      displayName = ?,
+      email = ?,
+      role = ?
+    WHERE id = ?;
+  `,
+    [data.name, data.email, data.role, Number(id)]
+  );
 
   if (result.changes === 0) {
     return null;
@@ -83,16 +80,15 @@ async function update(id: string, data: UserInput): Promise<User | null> {
 }
 
 async function remove(id: string): Promise<boolean> {
-  const userId = Number(id);
-
-  const result = await run(`
+  const result = await run(
+    `
     DELETE FROM users
-    WHERE id = ${userId};
-  `);
+    WHERE id = ?;
+  `,
+    [Number(id)]
+  );
 
   return result.changes > 0;
 }
-
-
 
 export { list, getById, create, update, remove };

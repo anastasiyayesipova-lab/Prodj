@@ -1,12 +1,19 @@
 const API_BASE_URL = "http://localhost:3000/api/v1";
+const DEMO_USER_ID = "1";
 
 async function request(path, options = {}) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
+  const headers = {
+    "X-Demo-UserId": DEMO_USER_ID,
+    ...(options.headers || {}),
+  };
+
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
+      headers,
       signal: controller.signal,
     });
 

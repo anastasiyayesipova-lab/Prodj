@@ -46,10 +46,13 @@ async function migrate() {
 
     const appliedAt = new Date().toISOString();
 
-    await run(`
-      INSERT INTO schema_migrations (filename, appliedAt)
-      VALUES ('${file}', '${appliedAt}');
-    `);
+    await run(
+  `
+  INSERT INTO schema_migrations (filename, appliedAt)
+  VALUES (?, ?);
+`,
+  [file, appliedAt]
+);
   }
 
   console.log("Migrations completed");

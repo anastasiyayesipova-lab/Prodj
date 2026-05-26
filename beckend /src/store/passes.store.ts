@@ -1,5 +1,4 @@
 import { all, get, run } from "../db/dbClient";
-import { escapeSqlString } from "../db/sqlHelpers";
 
 type Pass = {
   id: number;
@@ -25,8 +24,9 @@ type PassInput = {
   issuer: string;
 };
 
-async function list(): Promise<Pass[]> {
-  return await all(`
+async function list(currentUserId: number): Promise<Pass[]> {
+  return await all(
+    `
     SELECT
       p.id,
       p.userId,
@@ -45,15 +45,17 @@ async function list(): Promise<Pass[]> {
     JOIN passReasons r ON r.id = p.reasonId
     JOIN passStatuses s ON s.id = p.statusId
     WHERE p.deletedAt IS NULL
+      AND p.userId = ?
     ORDER BY p.createdAt DESC, p.id DESC
     LIMIT 10;
-  `);
+  `,
+    [currentUserId]
+  );
 }
 
-async function getById(id: string): Promise<Pass | undefined> {
-  const passId = Number(id);
-
-  return await get(`
+async function getById(id: string, currentUserId: number): Promise<Pass | undefined> {
+  return await get(
+    `
     SELECT
       p.id,
       p.userId,
@@ -71,23 +73,19 @@ async function getById(id: string): Promise<Pass | undefined> {
     JOIN users u ON u.id = p.userId
     JOIN passReasons r ON r.id = p.reasonId
     JOIN passStatuses s ON s.id = p.statusId
-    WHERE p.id = ${passId}
+    WHERE p.id = ?
+      AND p.userId = ?
       AND p.deletedAt IS NULL;
-  `);
+  `,
+    [Number(id), currentUserId]
+  );
 }
 
-
-
 async function create(data: PassInput): Promise<Pass> {
-  const userId = Number(data.userId);
-  const reasonId = Number(data.reasonId);
-  const statusId = Number(data.statusId);
-  const validDate = escapeSqlString(data.validDate);
-  const comment = escapeSqlString(data.comment || "");
-  const issuer = escapeSqlString(data.issuer);
   const createdAt = new Date().toISOString();
 
-  const result = await run(`
+  const result = await run(
+    `
     INSERT INTO passes (
       userId,
       reasonId,
@@ -96,23 +94,28 @@ async function create(data: PassInput): Promise<Pass> {
       comment,
       issuer,
       createdAt
-    ) VALUES (
-      ${userId},
-      ${reasonId},
-      ${statusId},
-      '${validDate}',
-      '${comment}',
-      '${issuer}',
-      '${createdAt}'
-    );
-  `);
+    ) VALUES (?, ?, ?, ?, ?, ?, ?);
+  `,
+    [
+      Number(data.userId),
+      Number(data.reasonId),
+      Number(data.statusId),
+      data.validDate,
+      data.comment || "",
+      data.issuer,
+      createdAt,
+    ]
+  );
 
-  await run(`
+  await run(
+    `
     INSERT INTO passHistory (passId, action, createdAt)
-    VALUES (${result.lastID}, 'CREATED', '${createdAt}');
-  `);
+    VALUES (?, ?, ?);
+  `,
+    [result.lastID, "CREATED", createdAt]
+  );
 
-  const created = await getById(String(result.lastID));
+  const created = await getById(String(result.lastID), data.userId);
 
   if (!created) {
     throw new Error("Failed to create pass");
@@ -121,27 +124,34 @@ async function create(data: PassInput): Promise<Pass> {
   return created;
 }
 
-async function update(id: string, data: PassInput): Promise<Pass | null> {
-  const passId = Number(id);
-   const userId = Number(data.userId);
-  const reasonId = Number(data.reasonId);
-  const statusId = Number(data.statusId);
-  const validDate = escapeSqlString(data.validDate);
-  const comment = escapeSqlString(data.comment || "");
-  const issuer = escapeSqlString(data.issuer);
-
-  const result = await run(`
+async function update(
+  id: string,
+  currentUserId: number,
+  data: PassInput
+): Promise<Pass | null> {
+  const result = await run(
+    `
     UPDATE passes
     SET
-      userId = ${userId},
-      reasonId = ${reasonId},
-      statusId = ${statusId},
-      validDate = '${validDate}',
-      comment = '${comment}',
-      issuer = '${issuer}'
-    WHERE id = ${passId}
+      reasonId = ?,
+      statusId = ?,
+      validDate = ?,
+      comment = ?,
+      issuer = ?
+    WHERE id = ?
+      AND userId = ?
       AND deletedAt IS NULL;
-  `);
+  `,
+    [
+      Number(data.reasonId),
+      Number(data.statusId),
+      data.validDate,
+      data.comment || "",
+      data.issuer,
+      Number(id),
+      currentUserId,
+    ]
+  );
 
   if (result.changes === 0) {
     return null;
@@ -149,48 +159,60 @@ async function update(id: string, data: PassInput): Promise<Pass | null> {
 
   const historyCreatedAt = new Date().toISOString();
 
-  await run(`
+  await run(
+    `
     INSERT INTO passHistory (passId, action, createdAt)
-    VALUES (${passId}, 'UPDATED', '${historyCreatedAt}');
-  `);
+    VALUES (?, ?, ?);
+  `,
+    [Number(id), "UPDATED", historyCreatedAt]
+  );
 
-  const updated = await getById(id);
+  const updated = await getById(id, currentUserId);
   return updated ?? null;
 }
 
-async function remove(id: string): Promise<boolean> {
-  const passId = Number(id);
+async function remove(id: string, currentUserId: number): Promise<boolean> {
   const deletedAt = new Date().toISOString();
 
-
-  const result = await run(`
+  const result = await run(
+    `
     UPDATE passes
-    SET deletedAt = '${deletedAt}'
-    WHERE id = ${passId}
+    SET deletedAt = ?
+    WHERE id = ?
+      AND userId = ?
       AND deletedAt IS NULL;
-  `);
+  `,
+    [deletedAt, Number(id), currentUserId]
+  );
 
   if (result.changes === 0) {
     return false;
   }
 
-  await run(`
+  await run(
+    `
     INSERT INTO passHistory (passId, action, createdAt)
-    VALUES (${passId}, 'SOFT_DELETED', '${deletedAt}');
-  `);
+    VALUES (?, ?, ?);
+  `,
+    [Number(id), "SOFT_DELETED", deletedAt]
+  );
 
   return true;
 }
 
-async function getStats() {
-  return await all(`
+async function getStats(currentUserId: number) {
+  return await all(
+    `
     SELECT
       statusId,
       COUNT(*) as count
     FROM passes
     WHERE deletedAt IS NULL
+      AND userId = ?
     GROUP BY statusId;
-  `);
+  `,
+    [currentUserId]
+  );
 }
 
 export { list, getById, create, update, remove, getStats };

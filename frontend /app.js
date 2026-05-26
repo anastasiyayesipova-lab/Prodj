@@ -170,33 +170,59 @@ const matchesReason =
 
 function render() {
   const filteredPasses = getFilteredPasses();
+
   if (passes.length === 0) {
     passesTable.hidden = true;
-    passesTbody.innerHTML = "";
+    passesTbody.textContent = "";
     return;
   }
 
   passesTable.hidden = false;
+  passesTbody.textContent = "";
 
-  passesTbody.innerHTML = filteredPasses
-  .map((p, index) => {
-    return `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${p.userName ?? "—"}</td>
-        <td>${p.reasonName ?? "—"}</td>
-        <td>${formatDate(p.validDate)}</td>
-        <td>${p.comment ?? "—"}</td>
-        <td>${p.issuer ?? "—"}</td>
-        <td>
-  <button type="button" data-action="details" data-id="${p.id}">Деталі</button>
-  <button type="button" data-action="delete" data-id="${p.id}">Видалити</button>
-  <button type="button" data-action="edit" data-id="${p.id}">Редагувати</button>
-</td>
-      </tr>
-    `;
-  })
-  .join("");
+  filteredPasses.forEach((p, index) => {
+    const tr = document.createElement("tr");
+
+    const values = [
+      index + 1,
+      p.userName ?? "—",
+      p.reasonName ?? "—",
+      formatDate(p.validDate),
+      p.comment ?? "—",
+      p.issuer ?? "—",
+    ];
+
+    values.forEach((value) => {
+      const td = document.createElement("td");
+      td.textContent = value;
+      tr.appendChild(td);
+    });
+
+    const actionsTd = document.createElement("td");
+
+    const detailsBtn = document.createElement("button");
+    detailsBtn.type = "button";
+    detailsBtn.dataset.action = "details";
+    detailsBtn.dataset.id = p.id;
+    detailsBtn.textContent = "Деталі";
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.dataset.action = "delete";
+    deleteBtn.dataset.id = p.id;
+    deleteBtn.textContent = "Видалити";
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.dataset.action = "edit";
+    editBtn.dataset.id = p.id;
+    editBtn.textContent = "Редагувати";
+
+    actionsTd.append(detailsBtn, deleteBtn, editBtn);
+    tr.appendChild(actionsTd);
+
+    passesTbody.appendChild(tr);
+  });
 }
 
 function resetForm() {
@@ -228,8 +254,7 @@ form.addEventListener("submit", async (event) => {
 
 
 
-  const dto = {
-  userId: 1,
+ const dto = {
   reasonId: reasonMap[data.reason],
   statusId: 1,
   validDate: data.validDate,
