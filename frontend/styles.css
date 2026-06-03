@@ -1,0 +1,41 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, sans-serif; background-color: #f7f7f7; }
+.page { width: min(100%, 1500px); margin: 0 auto; padding: 16px; display: flex; flex-wrap: wrap; gap: 20px; }
+.page-title { width: 100%; margin: 0 0 8px; text-align: center; font-size: 32px; }
+.panel { background: white; border: 1px solid #ddd; border-radius: 10px; padding: 20px; flex: 1 1 430px; min-width: 320px; }
+.panel-table { flex: 2 1 720px; min-width: 0; }
+.panel-wide { flex: 1 1 100%; }
+.panel-title { margin-top: 0; margin-bottom: 16px; }
+.field { display: block; margin-bottom: 6px; }
+.field-label { display: block; margin-bottom: 6px; font-weight: 600; }
+.field-input { width: 100%; padding: 12px; border: 1px solid #999; border-radius: 6px; font-size: 16px; margin-bottom: 6px; }
+.field-error { min-height: 18px; color: crimson; margin: 0 0 8px; }
+.form-actions, .current-user-row, .filters, .user-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.current-user-row .field-input { max-width: 360px; }
+.filters .field-input { flex: 1 1 260px; }
+button { padding: 8px 12px; cursor: pointer; }
+.status-message { margin-top: 10px; font-weight: 600; }
+.hint, .stats { color: #555; }
+.table-wrap { width: 100%; overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+.table th, .table td { border: 1px solid #ddd; padding: 10px; text-align: left; vertical-align: top; white-space: normal; overflow-wrap: anywhere; word-break: break-word; hyphens: auto; }
+.table th { background-color: #f3f3f3; font-weight: 600; }
+#passesTable th:nth-child(1), #passesTable td:nth-child(1) { width: 44px; }
+#passesTable th:nth-child(4), #passesTable td:nth-child(4) { width: 110px; }
+#passesTable th:nth-child(7), #passesTable td:nth-child(7) { width: 132px; }
+#usersTable th:nth-child(2), #usersTable td:nth-child(2) { width: 180px; }
+#usersTable th:nth-child(3), #usersTable td:nth-child(3) { width: 260px; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.actions button { padding: 6px 8px; font-size: 14px; white-space: normal; }
+.compact th, .compact td { padding: 8px; }
+.user-form .field-input { flex: 1 1 220px; }
+.is-invalid { border: 2px solid crimson; outline: none; }
+@media (max-width: 850px) { .page { padding: 10px; } .panel { min-width: 100%; } .table { min-width: 760px; } }
+.readonly-user {
+  padding: 12px 14px;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  background: #f7f7f7;
+  min-height: 24px;
+  font-weight: 600;
+}
